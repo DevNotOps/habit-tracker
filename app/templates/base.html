@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#e6f0f7">
+  <title>{% block title %}Habit Loop{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+</head>
+<body class="min-h-screen">
+  <header class="site-header">
+    <nav class="nav-wrap" aria-label="Main navigation">
+      <a class="brand" href="{{ url_for('habits.dashboard') if current_user.is_authenticated else url_for('auth.login') }}">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 12a7 7 0 0 1 12-4.9L19 9M19 5v4h-4M19 12a7 7 0 0 1-12 4.9L5 15m0 4v-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span><span>HABIT LOOP</span>
+      </a>
+      {% if current_user.is_authenticated %}
+      <div class="nav-tabs">
+        <a class="nav-tab {{ 'active' if request.endpoint == 'habits.dashboard' }}" href="{{ url_for('habits.dashboard') }}">Dashboard</a>
+        <a class="nav-tab" href="{{ url_for('habits.dashboard') }}#progress">Progress</a>
+      </div>
+      <div class="nav-user">
+        <span class="user-avatar" aria-hidden="true">{{ current_user.email[0]|upper }}</span>
+        <span class="nav-email">{{ current_user.email }}</span>
+        <form method="post" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="text-button" type="submit">Sign out</button>
+        </form>
+      </div>
+      {% else %}
+      <a class="text-button" href="{{ url_for('auth.login') }}">Sign in</a>
+      {% endif %}
+    </nav>
+  </header>
+  <main class="main-wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-stack" aria-live="polite">
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="footer">Steady, not perfect. Keep growing.</footer>
+</body>
+</html>

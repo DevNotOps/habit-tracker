@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Sign in · Habit Loop{% endblock %}
+{% block content %}
+<section class="auth-layout">
+  <div class="auth-intro">
+    <span class="eyebrow">A little, often</span>
+    <h1>Make room for<br>the things that matter.</h1>
+    <p>A calm place to build routines that feel like you.</p>
+    <div class="sprout-art" aria-hidden="true">✳</div>
+  </div>
+  <div class="auth-card">
+    <h2>Welcome back</h2>
+    <p class="muted">Pick up where you left off.</p>
+    <form method="post" class="form-stack">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Email address<input name="email" type="email" autocomplete="email" required maxlength="254" value="{{ request.form.get('email', '') }}"></label>
+      <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+      <button class="button button-primary button-wide" type="submit">Sign in <span aria-hidden="true">→</span></button>
+    </form>
+    <p class="auth-switch">New to Habit Loop? <a href="{{ url_for('auth.register') }}">Create an account</a></p>
+  </div>
+</section>
+{% endblock %}

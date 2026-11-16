@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Notes · {{ habit.title }} · Habit Loop{% endblock %}
+{% block content %}
+<section class="form-page journal-page">
+  <a class="back-link" href="{{ url_for('habits.dashboard') }}">← Back to your habits</a>
+  <div class="journal-heading">
+    <span class="eyebrow">Your habit journal</span>
+    <h1>{{ habit.title }}</h1>
+    <p class="muted">A place to notice the small things along the way.</p>
+  </div>
+  <section class="journal-card" aria-label="Notes for {{ habit.title }}">
+    {% if notes.items %}
+      {% for note in notes.items %}
+      <article class="journal-entry">
+        <time datetime="{{ note.note_date.isoformat() }}">{{ note.note_date.strftime('%A, %B %d, %Y') }}</time>
+        <form class="note-form" method="post" action="{{ url_for('habits.save_habit_note', habit_id=habit.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="note_date" value="{{ note.note_date.isoformat() }}">
+          <input type="hidden" name="return_to" value="journal">
+          <textarea name="body" rows="4" maxlength="2000" aria-label="Note for {{ note.note_date.strftime('%B %d, %Y') }}">{{ note.body }}</textarea>
+          <div class="journal-actions">
+            <button class="button button-soft note-save" type="submit">Save changes</button>
+            <button class="text-button delete-note" type="submit" name="delete" value="1" data-confirm="Delete this note?">Delete</button>
+          </div>
+        </form>
+      </article>
+      {% endfor %}
+      <nav class="pagination" aria-label="Note pages">
+        {% if notes.has_prev %}<a class="button button-quiet" href="{{ url_for('habits.habit_notes', habit_id=habit.id, page=notes.prev_num) }}">← Newer</a>{% endif %}
+        <span>Page {{ notes.page }} of {{ notes.pages }}</span>
+        {% if notes.has_next %}<a class="button button-quiet" href="{{ url_for('habits.habit_notes', habit_id=habit.id, page=notes.next_num) }}">Older →</a>{% endif %}
+      </nav>
+    {% else %}
+      <div class="journal-empty">
+        <span aria-hidden="true">✎</span>
+        <h2>No notes yet</h2>
+        <p>Write a note from your dashboard and it will appear here.</p>
+      </div>
+    {% endif %}
+  </section>
+</section>
+{% endblock %}

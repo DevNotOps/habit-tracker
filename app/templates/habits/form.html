@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if habit else 'New' }} habit · Habit Loop{% endblock %}
+{% block content %}
+<section class="form-page">
+  <a class="back-link" href="{{ url_for('habits.dashboard') }}">← Back to your habits</a>
+  <div class="form-card">
+    <span class="eyebrow">{{ 'Make it yours' if habit else 'Plant a new seed' }}</span>
+    <h1>{{ 'Edit your habit' if habit else 'Create a habit' }}</h1>
+    <p class="muted">Keep it simple. You can always adjust as you go.</p>
+    <form method="post" class="form-stack" data-habit-form>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Habit name<input name="title" type="text" required maxlength="120" placeholder="e.g. Take a morning walk" value="{{ request.form.get('title', habit.title if habit else '') }}"></label>
+      <label>Description <span class="label-hint">Optional</span><textarea name="description" rows="3" maxlength="500" placeholder="What makes this habit meaningful to you?">{{ request.form.get('description', habit.description if habit else '') }}</textarea></label>
+      <label>Frequency
+        <select name="frequency" data-frequency>
+          {% set selected_frequency = request.form.get('frequency', habit.frequency if habit else 'daily') %}
+          <option value="daily" {{ 'selected' if selected_frequency == 'daily' }}>Every day</option>
+          <option value="weekly" {{ 'selected' if selected_frequency == 'weekly' }}>A few times a week</option>
+        </select>
+      </label>
+      <label data-goal-field>Weekly check-in goal
+        {% set selected_goal = request.form.get('target_goal', habit.target_goal if habit else 3) %}
+        <select name="target_goal" data-goal>
+          {% for number in range(1, 8) %}<option value="{{ number }}" {{ 'selected' if selected_goal|string == number|string }}>{{ number }} {{ 'time' if number == 1 else 'times' }} a week</option>{% endfor %}
+        </select>
+        <span class="label-hint">Daily habits are expected once each day.</span>
+      </label>
+      <div class="form-actions">
+        <a class="button button-quiet" href="{{ url_for('habits.dashboard') }}">Cancel</a>
+        <button class="button button-primary" type="submit">{{ 'Save changes' if habit else 'Create habit' }}</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

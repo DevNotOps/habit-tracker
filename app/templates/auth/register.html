@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Create account · Habit Loop{% endblock %}
+{% block content %}
+<section class="auth-layout">
+  <div class="auth-intro">
+    <span class="eyebrow">Start where you are</span>
+    <h1>Small steps.<br>Brighter days.</h1>
+    <p>Build a rhythm you can return to, one check-in at a time.</p>
+    <div class="sprout-art" aria-hidden="true">✳</div>
+  </div>
+  <div class="auth-card">
+    <h2>Create your account</h2>
+    <p class="muted">Your next chapter starts small.</p>
+    <form method="post" class="form-stack">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Email address<input name="email" type="email" autocomplete="email" required maxlength="254" value="{{ request.form.get('email', '') }}"></label>
+      <label>Password <span class="label-hint">12 characters minimum</span><input name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></label>
+      <button class="button button-primary button-wide" type="submit">Create account <span aria-hidden="true">→</span></button>
+    </form>
+    <p class="auth-switch">Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a></p>
+  </div>
+</section>
+{% endblock %}

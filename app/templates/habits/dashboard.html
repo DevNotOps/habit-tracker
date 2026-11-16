@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Habit Loop{% endblock %}
+{% block content %}
+<section class="dashboard-shell">
+  <header class="dashboard-heading">
+    <div>
+      <span class="eyebrow">{{ today.strftime('%A, %B %d') }}</span>
+      <h1>My Habits</h1>
+      <p class="muted">Small steps, steady progress. Keep your momentum going.</p>
+    </div>
+  </header>
+
+  <div class="dashboard-layout">
+    <section class="habits-panel" aria-label="Your habits">
+      <div class="panel-heading">
+        <div>
+          <h2>Today’s routine</h2>
+          <p>{{ cards|length }} {{ 'habit' if cards|length == 1 else 'habits' }} in your loop</p>
+        </div>
+        <a class="button button-primary" href="{{ url_for('habits.create_habit') }}"><span aria-hidden="true">＋</span> Add New Habit</a>
+      </div>
+
+      {% if cards %}
+      <div class="habit-list">
+        {% for card in cards %}
+        <article class="habit-card" id="habit-{{ card.habit.id }}">
+          <div class="habit-identity">
+            <div class="habit-name-row">
+              <h3>{{ card.habit.title }}</h3>
+              <span class="frequency-tag">{{ 'Daily' if card.habit.frequency == 'daily' else 'Weekly · ' ~ card.habit.target_goal ~ '×' }}</span>
+            </div>
+            {% if card.habit.description %}<p class="habit-description">{{ card.habit.description }}</p>{% endif %}
+          </div>
+
+          <div class="week-progress" aria-label="Last seven days">
+            <div class="week-dots">
+              {% for day in card.week_days %}
+              <span class="week-dot {{ 'completed' if day.completed }} {{ 'today' if day.is_today }}" title="{{ day.date.strftime('%A, %B %d') }}{{ ' · completed' if day.completed else '' }}" aria-label="{{ day.date.strftime('%A, %B %d') }}: {{ 'complete' if day.completed else 'not complete' }}"></span>
+              {% endfor %}
+            </div>
+            <span class="row-label">Last 7 days</span>
+          </div>
+
+          <div class="current-stat">
+            <span class="row-label">Current</span>
+            <strong>{{ card.current_streak }} <small>{{ 'day' if card.habit.frequency == 'daily' else 'wk' }}{{ '' if card.current_streak == 1 else 's' }}</small></strong>
+          </div>
+
+          <div class="today-action">
+            <span class="row-label">Today</span>
+            <form method="post" action="{{ url_for('habits.check_in', habit_id=card.habit.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="button checkin-button {{ 'button-done' if card.done_today else 'button-soft' }}" type="submit" aria-label="{{ 'Undo today’s check-in for ' ~ card.habit.title if card.done_today else 'Check in ' ~ card.habit.title ~ ' for today' }}">
+                {{ '✓ Done' if card.done_today else 'Check' }}
+              </button>
+            </form>
+          </div>
+
+          <div class="menu-wrap habit-menu">
+            <button class="icon-button menu-toggle" type="button" aria-label="Options for {{ card.habit.title }}" aria-expanded="false">•••</button>
+            <div class="menu-panel" hidden>
+              <a href="{{ url_for('habits.edit_habit', habit_id=card.habit.id) }}">Edit habit</a>
+              <form method="post" action="{{ url_for('habits.delete_habit', habit_id=card.habit.id) }}" data-confirm="Delete this habit and its check-in history?">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="danger-link">Delete habit</button>
+              </form>
+            </div>
+          </div>
+
+          <details class="notes-panel">
+            <summary>
+              <span>Daily notes</span>
+              <span class="note-count">{{ card.note_count }} saved · {{ 'edit today' if card.today_note else 'add today' }}</span>
+            </summary>
+            <form class="note-form" method="post" action="{{ url_for('habits.save_habit_note', habit_id=card.habit.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="note_date" value="{{ today.isoformat() }}">
+              <textarea name="body" rows="3" maxlength="2000" aria-label="Today's note for {{ card.habit.title }}" placeholder="How did it go today?">{{ card.today_note.body if card.today_note else '' }}</textarea>
+              <button class="button button-soft note-save" type="submit">Save today’s note</button>
+            </form>
+            <a class="notes-link" href="{{ url_for('habits.habit_notes', habit_id=card.habit.id) }}">View note journal →</a>
+          </details>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon" aria-hidden="true">🌱</div>
+        <h2>Your loop starts here.</h2>
+        <p>Add one small habit you’d like to make space for.</p>
+        <a class="button button-primary" href="{{ url_for('habits.create_habit') }}">Create your first habit</a>
+      </div>
+      {% endif %}
+    </section>
+
+    <aside class="progress-panel" id="progress" aria-label="Streak summary">
+      <h2>Streak Summary</h2>
+      <div class="progress-ring" style="--progress: {{ completion_percent }}%">
+        <div><strong>{{ completion_percent }}%</strong></div>
+      </div>
+      <div class="progress-legend">
+        <span><i class="legend-dot completion-dot"></i>Check-ins this week</span>
+        <strong>{{ weekly_checkins }}</strong>
+      </div>
+      <div class="progress-legend">
+        <span><i class="legend-dot checkin-dot"></i>Total check-ins</span>
+        <strong>{{ total_checkins }}</strong>
+      </div>
+      <p class="progress-caption">Habit completion over the last 7 days.</p>
+    </aside>
+  </div>
+</section>
+{% endblock %}

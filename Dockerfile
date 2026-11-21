@@ -15,7 +15,7 @@ ENV PATH="/app/.deps/bin:${PATH}"
 COPY --chown=app:app app ./app
 COPY --chown=app:app wsgi.py ./wsgi.py
 
-USER app
+#USER app
 
 EXPOSE 8000
 

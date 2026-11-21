@@ -24,7 +24,8 @@ services:
     environment:
       SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env}
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-habit_user}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-habit_tracker}
-    command: ["flask", "--app", "wsgi:app", "init-db"]
+    #command: ["flask", "--app", "wsgi:app", "init-db"]
+    command: ["python", "-m", "flask", "--app", "wsgi:app", "init-db"]
     depends_on:
       db:
         condition: service_healthy

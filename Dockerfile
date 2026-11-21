@@ -11,6 +11,7 @@ COPY requirements.txt ./
 #RUN pip install --no-cache-dir -r requirements.txt
 COPY .deps /app/.deps
 ENV PYTHONPATH="/app/.deps"
+ENV PATH="/app/.deps/bin:${PATH}"
 COPY --chown=app:app app ./app
 COPY --chown=app:app wsgi.py ./wsgi.py
 

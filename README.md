@@ -1,5 +1,83 @@
 # Habit Loop
 
+A responsive habit tracker built with Flask, SQLAlchemy and PostgreSQL, with login, streaks, daily notes and optional email reminders. Runs locally or in Docker.
+
+## 1. The project and the problem it solves
+
+Habits fail when you cannot see your progress. Habit Loop lets each user create daily or weekly habits, check them off, keep a short note per day, and see current and longest streaks. Optional email reminders nudge users who have unfinished goals.
+
+## 2. Technologies and versions
+
+- Python 3.12 (Docker image `python:3.12-slim`; Python 3.10+ works locally)
+- Flask 3, Flask-Login, Flask-SQLAlchemy 3.1, Flask-WTF (CSRF protection)
+- PostgreSQL 16 (`postgres:16-alpine` in Compose; 13+ works)
+- Gunicorn, Docker Compose, pytest
+
+## 3. Requirements and dependencies
+
+- Python 3.10+ and PostgreSQL 13+ for a local run, or Docker with Compose
+- Packages are listed in `requirements.txt`
+- An SMTP account, only if you want reminder emails
+
+## 4. Install and run
+
+Docker (recommended):
+
+```bash
+cp .env.example .env      # then set SECRET_KEY and POSTGRES_PASSWORD
+docker compose up --build -d
+# open http://localhost:8000
+```
+
+Local (Linux/macOS):
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env      # set SECRET_KEY, DATABASE_URL, SMTP settings
+flask --app wsgi:app init-db
+flask --app wsgi:app run  # open http://127.0.0.1:5000
+```
+
+The Windows PowerShell steps and the PostgreSQL role/database setup are in the detailed notes below.
+
+## 5. Environment variables and secrets
+
+Copy `.env.example` to `.env`. The values in the example are placeholders. Replace them and never commit your real `.env`.
+
+| Variable | Purpose |
+|---|---|
+| `SECRET_KEY` | Flask session key. Generate with `python -c "import secrets; print(secrets.token_hex(32))"` |
+| `DATABASE_URL` | SQLAlchemy URL for PostgreSQL |
+| `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | Database used by Docker Compose |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_USE_TLS` | Optional reminder emails |
+| `SESSION_COOKIE_SECURE` | Set to `true` behind HTTPS |
+
+## 6. How to use it
+
+1. Register an account and sign in.
+2. Create a habit: daily, or weekly with a goal of 1 to 7 check-ins.
+3. Check habits off on the dashboard. A check-in can be toggled off for today.
+4. Add a daily note for any habit and review past notes in the journal.
+5. Watch current and longest streaks grow.
+6. Send reminders with `flask --app wsgi:app send-reminders`. Schedule it daily with cron or Task Scheduler.
+
+## 7. Screenshots / demo
+
+No screenshots or hosted demo yet. Run it with Docker to see the app at http://localhost:8000.
+
+## 8. Tests
+
+```bash
+pip install pytest
+pytest
+```
+
+Tests are in `tests/` (`test_app.py`, `test_streaks.py`).
+
+---
+
+# Detailed notes
 A responsive habit tracker built with Flask, SQLAlchemy, PostgreSQL, server-side login sessions, and optional SMTP reminders.
 
 ## Requirements
